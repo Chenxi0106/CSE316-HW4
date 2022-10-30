@@ -15,6 +15,9 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Paper from '@mui/material/Paper';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
+import AlertTitle from '@mui/material/AlertTitle';
 
 export default function LoginScreen() {
     const { auth } = useContext(AuthContext);
@@ -28,9 +31,19 @@ export default function LoginScreen() {
         );
 
     };
+    const handleClose=()=>{
+        auth.closeAlertModal();
+    }
 
     return (
         <Grid container component="main" sx={{ height: '100vh' }}>
+            {auth.errorMessage != null && <Stack sx={{ width: '100%' }}>
+                <Alert severity="error" onClose={handleClose }>
+                    <AlertTitle>Error</AlertTitle>
+                    This is an error alert — <strong>{auth.errorMessage}</strong>
+                </Alert>
+            </Stack>
+            }
             <CssBaseline />
             <Grid
                 item

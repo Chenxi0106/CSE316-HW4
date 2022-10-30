@@ -137,6 +137,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-bottom: 10px;
 }
 
 #add-list-button {
@@ -152,6 +153,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow: scroll;
+  margin-top:30px;
 }
 
 .list-card,

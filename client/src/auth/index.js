@@ -10,7 +10,9 @@ export const AuthActionType = {
     GET_LOGGED_IN: "GET_LOGGED_IN",
     LOGIN_USER: "LOGIN_USER",
     LOGOUT_USER: "LOGOUT_USER",
-    REGISTER_USER: "REGISTER_USER"
+    REGISTER_USER: "REGISTER_USER",
+    FAIL_AUTHENTICATION: "FAIL_AUTHENTICATION",
+ 
 }
 
 function AuthContextProvider(props) {
@@ -51,6 +53,13 @@ function AuthContextProvider(props) {
                     loggedIn: true
                 })
             }
+            case AuthActionType.FAIL_AUTHENTICATION: {
+                return setAuth({
+                    user: auth.user,
+                    loggedIn: auth.loggedIn,
+                    errorMessage: payload
+                })
+            }
             default:
                 return auth;
         }
@@ -69,29 +78,48 @@ function AuthContextProvider(props) {
         }
     }
 
-    auth.registerUser = async function(firstName, lastName, email, password, passwordVerify) {
-        const response = await api.registerUser(firstName, lastName, email, password, passwordVerify);      
-        if (response.status === 200) {
+    auth.registerUser = async function (firstName, lastName, email, password, passwordVerify) {
+        try {
+            const response = await api.registerUser(firstName, lastName, email, password, passwordVerify);
+            console.log("value is " + response);
+            if (response.status === 200) {
+                authReducer({
+                    type: AuthActionType.REGISTER_USER,
+                    payload: {
+                        user: response.data.user
+                    }
+                })
+                auth.loginUser(email, password);
+            }
+        } catch (error) {
+            console.log(error);
             authReducer({
-                type: AuthActionType.REGISTER_USER,
-                payload: {
-                    user: response.data.user
-                }
+                type: AuthActionType.FAIL_AUTHENTICATION,
+                payload: error.response.data.errorMessage
+                
             })
-            history.push("/login");
         }
+
     }
 
-    auth.loginUser = async function(email, password) {
-        const response = await api.loginUser(email, password);
-        if (response.status === 200) {
+    auth.loginUser = async function (email, password) {
+        try {
+            const response = await api.loginUser(email, password);
+            if (response.status === 200) {
+                authReducer({
+                    type: AuthActionType.LOGIN_USER,
+                    payload: {
+                        user: response.data.user
+                    }
+                })
+                history.push("/");
+            }
+        } catch (error) {
+            console.log(error);
             authReducer({
-                type: AuthActionType.LOGIN_USER,
-                payload: {
-                    user: response.data.user
-                }
+                type: AuthActionType.FAIL_AUTHENTICATION,
+                payload:error.response.data.errorMessage
             })
-            history.push("/");
         }
     }
 
@@ -115,6 +143,14 @@ function AuthContextProvider(props) {
         console.log("user initials: " + initials);
         return initials;
     }
+
+        //own code
+        auth.closeAlertModal = function () {
+            authReducer({
+                type: AuthActionType.FAIL_AUTHENTICATION,
+                payload: null
+            })
+        }
 
     return (
         <AuthContext.Provider value={{
